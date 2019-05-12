@@ -1,0 +1,14 @@
+[Unit]
+Description= Detection de QRCODE pour piloter cisaille
+Documentation=man:cron(8)  # pour man.service
+After=multi-user.target
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/usr/bin/python3 /home/pi/detection.py
+Type = simple(defaut)	Le programme est le service
+User=pi
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
