@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*
+
 # test de la caméra picamera.py
 # importer les paquets requis pour la Picaméra
 from picamera.array import PiRGBArray
@@ -9,27 +12,31 @@ from pyzbar import pyzbar
 import imutils
 import RPi.GPIO as GPIO
 
-show = False
+show = True
 real = True
 
 resolution = (320, 240) # Résolution de la camera
 
-# Initialisation led, buzzer et relais
-led=17
-buzz = 25
+# Initialisation leds et relais
+led_rouge = 22
+led_jaune = 17
 relais = 24
-ouputs_pins = [led, buzz,relais]
+outputs_pins = [led_rouge,relais]
+wait_pins = [led_jaune]
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(ouputs_pins, GPIO.OUT)
-GPIO.output(ouputs_pins, GPIO.LOW)
+GPIO.setup(outputs_pins + wait_pins, GPIO.OUT)
+GPIO.output(outputs_pins, GPIO.LOW)
+GPIO.output(wait_pins, GPIO.HIGH)
+
 def on_detect(rect):
     (x, y, w, h) = rect
     print("QRCODE DETECTE : x:%d%%, y:%d%%"%((x+w/2)*100/resolution[0]-50,(y+h/2)*100/resolution[1]-50))
-    GPIO.output(ouputs_pins, GPIO.HIGH)
+    GPIO.output(outputs_pins, GPIO.HIGH)
+    GPIO.output(wait_pins, GPIO.LOW)
     time.sleep(1)
-    GPIO.output(ouputs_pins, GPIO.LOW)
+    GPIO.output(outputs_pins, GPIO.LOW)
     time.sleep(5)
-
+    GPIO.output(wait_pins, GPIO.HIGH)
 
 # initialisation des paramètres pour la capture
 camera = PiCamera()
