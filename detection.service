@@ -5,7 +5,7 @@ After=multi-user.target
 
 [Service]
 TimeoutStartSec=0
-ExecStart=/usr/bin/python3 /home/pi/detection.py
+ExecStart=/usr/bin/python3 /home/pi/Detection/detection.py
 Type = simple(defaut)	Le programme est le service
 User=pi
 KillMode=process
