@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, send_file
 
 from six import *
 import json
+import os
 
 app = Flask(__name__)
 #url_for('static', filename='style.css')
@@ -71,6 +72,11 @@ def show_json():
 def send_image_file():
     print("Send %s"%tmp_dir+image_file)
     return send_file(tmp_dir+image_file, mimetype='image/gif')
+
+@app.route('/shutdown')
+def shutdown():
+    os.system("shutdown now -h")
+    return "bye"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80, debug=True)
