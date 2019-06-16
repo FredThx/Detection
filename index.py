@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, send_file
 from six import *
 import json
 import os
+import argparse
 
 app = Flask(__name__)
 #url_for('static', filename='style.css')
@@ -29,7 +30,6 @@ def write_file(datas, jsonfile_name):
     try:
         app.logger.debug("Write json file....")
         with open(jsonfile_name, 'w') as jsonfile:
-            print(datas)
             json.dump(datas, jsonfile)
             app.logger.debug("ok")
     except Exception as e:
@@ -48,7 +48,6 @@ def index():
 
 @app.route('/<command>/<action>')
 def cmd(command, action):
-    print("Cmd : %s,%s"%(command, action))
     datas = dict(default)
     datas.update(read_file(tmp_dir+detection_json))
     if command == "camera":
@@ -70,7 +69,6 @@ def show_json():
 
 @app.route('/'+image_file)
 def send_image_file():
-    print("Send %s"%tmp_dir+image_file)
     return send_file(tmp_dir+image_file, mimetype='image/gif')
 
 @app.route('/shutdown')
@@ -79,4 +77,7 @@ def shutdown():
     return "bye"
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80, debug=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d","--debug", help="Debug mode", action="store_true")
+    args = parser.parse_args()
+    app.run(host='0.0.0.0', port=80, debug=args.debug)

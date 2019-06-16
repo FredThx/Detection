@@ -38,7 +38,7 @@ class Detector():
                     outputs_pins = [22, 24], #Led_rouge et relais
                     wait_pins = [24],
                     tmp_dir = '/ramdisk/',
-                    detection_json = 'detection_json',
+                    detection_json = 'detection.json',
                     image_file = 'capture.jpg',
                     resolution = (320,240),
                     framerate = 10,
@@ -57,18 +57,9 @@ class Detector():
         self.scan_json_file_period = scan_json_file_period
         self.outputs_pins = outputs_pins
         self.wait_pins = wait_pins
-        try:
-            self.show = args["show"]
-        except:
-            self.show = False
-        try:
-            self.debug = args["debug"]
-        except:
-            self.debug = False
-        try:
-            self.testmode = args["testmode"]
-        except:
-            self.testmode = False
+        self.show = args.show
+        self.debug = args.debug
+        self.testmode = args.testmode
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(outputs_pins + wait_pins, GPIO.OUT)
         GPIO.output(outputs_pins, GPIO.LOW)
@@ -153,7 +144,6 @@ class Detector():
             except PiCameraClosed as e:
                 datas = self.read_file()
                 if datas["active"]:
-                    logging.info("Camera open by json file.")
                     self.start_camera()
                 else:
                     time.sleep(1)
