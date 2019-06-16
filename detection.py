@@ -1,6 +1,22 @@
 #!/usr/bin/env python
-
 # -*- coding:utf-8 -*
+'''
+Programme de détection de QRCODE
+pour piloter la cisaille de coupe de la machine d'imprégnation décors OLFA
+
+Usage : python3 detection.py --options
+        avec options:
+            -s  Affiche la video
+            -d  Mode debug : affiche le temps entre chaque mesures
+            -t  Mode test : pas d'action sur les GPIO : juste logging
+
+En mode service :
+    sudo systemctl enable path_complet/detection.service
+'''
+
+
+
+
 
 # importer les paquets requis pour la Picamera
 from picamera.array import PiRGBArray
@@ -62,17 +78,17 @@ def on_detect(rect):
 logging.info("Start Camera...")
 camera = PiCamera()
 camera.resolution = resolution
-camera.framerate = 32
+camera.framerate = 10   # Si 30 : plante le Rpi0!
+                        # Si 20 : plus lent !
 rawCapture = PiRGBArray(camera)#, size=(160, 120)
 # temps reserve pour l'autofocus
 time.sleep(0.1)
 logging.info("Camera prête. Detection start.")
-
+now = time.time()
 # capture du flux video
 while True:
     try:
         for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-            now = time.time()
             image = frame.array
             #image = imutils.resize(image, width=400)
             barcodes = pyzbar.decode(image)
@@ -101,6 +117,7 @@ while True:
                 cv2.imshow("image", image)
             rawCapture.truncate(0)
             logging.debug(time.time()-now)
+            now = time.time()
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):
                 sys.exit(0)
