@@ -1,0 +1,14 @@
+[Unit]
+Description= Interface Web pour Detection de QRCODE pour piloter cisaille
+Documentation=man:cron(8)  # pour man.service
+After=multi-user.target
+
+[Service]
+TimeoutStartSec=0
+ExecStart= bash /home/pi/Detection/server.sh
+Type = simple
+User=root
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
