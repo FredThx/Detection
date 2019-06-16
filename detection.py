@@ -22,17 +22,21 @@ En mode service :
 from picamera.array import PiRGBArray
 from picamera.array import PiArrayOutput
 from picamera import PiCamera
+from picamera import PiCameraClosed
 
 import sys
 import time
 import cv2
+import json
 from pyzbar import pyzbar
 import imutils
 import RPi.GPIO as GPIO
 import argparse
 from FUTIL.my_logging import *
 
-
+tmp_dir = '/ramdisk/'
+detection_json = 'detection.json'
+image_file = 'capture.jpg'
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-s","--show", help="Show video (Need GUI)", action="store_true")
@@ -50,6 +54,7 @@ else:
 
 
 resolution = (320, 240) # Resolution de la camera
+scan_json_file_period = 10
 
 # Initialisation leds et relais
 led_rouge = 22
@@ -74,6 +79,15 @@ def on_detect(rect):
     GPIO.output(wait_pins, GPIO.HIGH)
 
 
+def read_file():
+    try:
+        with open(tmp_dir+detection_json, 'r') as jsonfile:
+            datas = json.load(jsonfile)
+    except IOError:
+        datas = {"active" : True, "visualisation" : False}
+    return datas
+
+
 # initialisation des parametres pour la capture
 logging.info("Start Camera...")
 camera = PiCamera()
@@ -85,6 +99,9 @@ rawCapture = PiRGBArray(camera)#, size=(160, 120)
 time.sleep(0.1)
 logging.info("Camera prête. Detection start.")
 now = time.time()
+scan_json_file_counter = 0
+camera_active = True
+
 # capture du flux video
 while True:
     try:
@@ -121,12 +138,31 @@ while True:
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):
                 sys.exit(0)
+            scan_json_file_counter +=1
+            if scan_json_file_counter>scan_json_file_period:
+                scan_json_file_counter = 0
+                datas = read_file()
+                if camera_active and not datas["active"]:
+                    camera_active = False
+                    camera.close()
+                    logging.info("Camera close by json file.")
+                if camera_active and datas["visualisation"]:
+                    logging.debug("image captured.")
+                    cv2.imwrite(tmp_dir+image_file,image)
+
+    except PiCameraClosed as e:
+        datas = read_file()
+        if datas["active"]:
+            camera = PiCamera()
+            logging.info("Camera open by json file.")
+            camera.resolution = resolution
+            camera.framerate = 32
+            rawCapture = PiRGBArray(camera)
+            time.sleep(0.1)
+            camera_active = True
+        else:
+            time.sleep(1)
     except Exception as e:
         logging.warning("Erreur : %s"%e)
         camera.close()
-        camera = PiCamera()
-        camera.resolution = resolution
-        camera.framerate = 32
-        rawCapture = PiRGBArray(camera)#, size=(160, 120)
-        # temps reserve pour l'autofocus
-        time.sleep(0.1)
+        camera_active = False

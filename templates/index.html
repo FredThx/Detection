@@ -1,0 +1,26 @@
+<!doctype html>
+<title>Détection de qrcode pour OLFA/Imprégnation</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <h1>Détection de qrcode pour OLFA/Imprégnation</h1>
+  <h3>
+			Camera ==>
+			<a href="/camera/on" class="button">ON</a>
+			<a href="/camera/off"class="button">OFF</a>
+      Visualisation ==>
+      <a href="/visualisation/on" class="button">ON</a>
+			<a href="/visualisation/off"class="button">OFF</a>
+      <p>La caméra est
+        {% if datas.active %} active {% else %} inactive {% endif %}
+      </p>
+      <p>
+        <img src = "{{image_file}}" alt="Visualisation désactivée" title = "Camera" id = "capture"/>
+      </p>
+	</h3>
+{% if image != "" %}
+<script type="text/javascript">
+setInterval(function() {
+  var myImageElement = document.getElementById('capture');
+  myImageElement.src = "{{image}}?" + new Date().getTime();
+}, 500);
+</script>
+{% endif %}
