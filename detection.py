@@ -36,7 +36,7 @@ class Detector():
 
     def __init__(self,
                     outputs_pins = [22, 24], #Led_rouge et relais
-                    wait_pins = [24],
+                    wait_pins = [17],
                     tmp_dir = '/ramdisk/',
                     detection_json = 'detection.json',
                     image_file = 'capture.jpg',

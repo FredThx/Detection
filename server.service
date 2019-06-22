@@ -6,7 +6,6 @@ After=multi-user.target
 [Service]
 TimeoutStartSec=0
 ExecStart= /home/pi/Detection/server.sh
-Type = simple
 User=root
 KillMode=process
 
