@@ -22,6 +22,7 @@ from picamera import PiCameraClosed
 
 import sys
 import time
+import datetime
 import cv2
 import json
 from pyzbar import pyzbar
@@ -41,7 +42,7 @@ class Detector():
                     detection_json = 'detection.json',
                     image_file = 'capture.jpg',
                     resolution = (320,240),
-                    framerate = 10,
+                    framerate = 2,
                     scan_json_file_period = 10,
                     args = None):
         '''Création du détecteur
@@ -69,13 +70,22 @@ class Detector():
 
     def on_detect(self, rect):
         if not self.testmode :
-            (x, y, w, h) = rect
-            logging.info("QRCODE DETECTE : x:%d%%, y:%d%%"%((x+w/2)*100/self.resolution[0]-50,(y+h/2)*100/self.resolution[1]-50))
-            GPIO.output(self.outputs_pins, GPIO.HIGH)
             GPIO.output(self.wait_pins, GPIO.LOW)
+            (x, y, w, h) = rect
+            now = datetime.datetime.now()
+            logging.info("QRCODE DETECTE %s: x:%d%%, y:%d%%"%(now,(x+w/2)*100/self.resolution[0]-50,(y+h/2)*100/self.resolution[1]-50))
+            distance = (y+h/2)*100/self.resolution[1]-10.0
+            if distance>0:
+                tempo = 2.48*distance/30.0
+                logging.info("Temporisation de %f secondes"%tempo)
+                time.sleep(tempo)
+            else:
+                logging.info("pas de tempo")
+            GPIO.output(self.outputs_pins, GPIO.HIGH)
+
             time.sleep(1)
             GPIO.output(self.outputs_pins, GPIO.LOW)
-            time.sleep(5)
+            time.sleep(2)
             GPIO.output(self.wait_pins, GPIO.HIGH)
 
 
@@ -91,21 +101,32 @@ class Detector():
         '''Start the camera
         '''
         logging.info("Start Camera...")
-        self.camera = PiCamera()
-        self.camera.resolution = self.resolution
-        self.camera.framerate = self.framerate
-        self.rawCapture = PiRGBArray(self.camera)#, size=(160, 120)
+        GPIO.output(self.wait_pins, GPIO.HIGH)
+        try:
+            self.camera = PiCamera()
+            self.camera.resolution = self.resolution
+            self.camera.framerate = self.framerate
+            self.rawCapture = PiRGBArray(self.camera)#, size=(160, 120)
         # temps reserve pour l'autofocus
-        time.sleep(0.1)
-        logging.info("Camera prête. Detection start.")
-        self.camera_active = True
+            time.sleep(0.1)
+            logging.info("Camera prête. Detection start.")
+            self.camera_active = True
+        except Exception as e:
+            logging.error("Error initialising camera : %s"%e)
+            self.camera_active = False
+            GPIO.output(self.wait_pins, GPIO.LOW)
+            time.sleep(1)
 
     def close_camera(self, cause = ""):
         '''Stop the camera
         '''
         logging.info("Stop Camera %s."%cause)
-        self.camera.close()
-        self.camera_active = False
+        try:
+            self.camera.close()
+            self.camera_active = False
+            GPIO.output(self.wait_pins, GPIO.LOW)
+        except:
+            time.sleep(1)
 
     def run(self):
         '''The main programm
@@ -118,6 +139,7 @@ class Detector():
             try:
                 for frame in self.camera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
                     image = frame.array
+                    image = image[int(self.resolution[1]/2):,0:int(self.resolution[0]*4/5)]
                     barcodes = pyzbar.decode(image)
                     if len(barcodes)>0:
                         self.on_detect(barcodes[0].rect)
