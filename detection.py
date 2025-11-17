@@ -210,10 +210,10 @@ class Detector():
                     if self.show:
                         cv2.arrowedLine(image,*self.arrow)
                         for barcode in barcodes:
-                        	(x, y, w, h) = barcode.rect
-                        	cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                        	barcodeData = barcode.data.decode("utf-8")
-                        	barcodeType = barcode.type
+                            (x, y, w, h) = barcode.rect
+                            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                            barcodeData = barcode.data.decode("utf-8")
+                            barcodeType = barcode.type
                         cv2.imshow("image", image)
                         cv2.waitKey(1)
                     self.rawCapture.truncate(0)
