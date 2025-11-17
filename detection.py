@@ -139,16 +139,16 @@ class Detector():
             try:
                 for frame in self.camera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
                     image = frame.array
-                    image = image[int(self.resolution[1]/2):,0:int(self.resolution[0]*4/5)]
+                    #image = image[int(self.resolution[1]/2):,0:int(self.resolution[0]*4/5)]
                     barcodes = pyzbar.decode(image)
                     if len(barcodes)>0:
                         self.on_detect(barcodes[0].rect)
                     if self.show:
                         for barcode in barcodes:
-                        	(x, y, w, h) = barcode.rect
-                        	cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                        	barcodeData = barcode.data.decode("utf-8")
-                        	barcodeType = barcode.type
+                            (x, y, w, h) = barcode.rect
+                            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                            barcodeData = barcode.data.decode("utf-8")
+                            barcodeType = barcode.type
                         cv2.imshow("image", image)
                     self.rawCapture.truncate(0)
                     logging.debug(time.time()-now)
