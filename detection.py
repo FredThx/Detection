@@ -48,11 +48,11 @@ class Detector():
                     wait_pins = [22],
                     output_duration = 1,
                     resolution = (640, 480),
-                    distance_camera_papier = 330.0, # mm
-                    distance_camera_coupe = 600.0, # mm
-                    vitesse_avance = 50.0, # mm/s
+                    distance_camera_papier = 230.0, # mm
+                    distance_camera_coupe = 585.0, # mm
+                    vitesse_avance = 66.7, # mm/s
                     orientation = App.X,
-                    direction = App.NORMAL,
+                    direction = App.REVERSE,
                     framerate = 32,
                     cb_type = 'QRCODE',
                     cb_text = None,
@@ -87,6 +87,7 @@ class Detector():
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers = 3) #Pour threading
         distance_camera_papier = float(distance_camera_papier)
         self.real_size =  (distance_camera_papier*340.0/330.0, distance_camera_papier*260.0/330.0,)
+        #self.real_size =  (150,100)
         self.distance_camera_coupe = float(distance_camera_coupe)
         self.vitesse_avance = float(vitesse_avance)
         self.orientation = orientation
