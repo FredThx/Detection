@@ -34,3 +34,7 @@
 *.exe
 *.out
 *.app
+
+# Pyhton
+*.pyc
+__pycache__
