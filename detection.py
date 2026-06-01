@@ -56,6 +56,7 @@ class Detector():
                     framerate = 32,
                     cb_type = 'QRCODE',
                     cb_text = None,
+                    offset=0.0, #mm
                     args = None,
                     ):
         '''Création du détecteur
@@ -67,6 +68,7 @@ class Detector():
         self.wait_pins = wait_pins
         self.detection_pins = detection_pins
         self.output_duration = output_duration
+        self.offset = offset
         if args and 'show' in args:
             self.show = args.show
         else:
@@ -136,7 +138,7 @@ class Detector():
             now = datetime.datetime.now()
             #logging.info("QRCODE DETECTE %s: x:%d%%, y:%d%%"%(now,(x+w/2)*100/self.resolution[0]-50,(y+h/2)*100/self.resolution[1]-50))
             distance_qrcode_centre = (position_px * self.real_size[self.orientation] / self.resolution[self.orientation]  - self.real_size[self.orientation] / 2.0) * self.direction
-            distance_qrcode_coupe = self.distance_camera_coupe - distance_qrcode_centre
+            distance_qrcode_coupe = self.distance_camera_coupe - distance_qrcode_centre + self.offset
             logging.info("QRCODE DETECTE à %smm de la camera => %smm de la coupe"%(int(distance_qrcode_centre), int(distance_qrcode_coupe)))
             tempo = max(0,distance_qrcode_coupe/self.vitesse_avance)
             logging.info("Temporisation de %f secondes"%tempo)
@@ -232,6 +234,7 @@ if __name__ == "__main__":
     parser.add_argument("-s","--show", help="Show video (Need GUI)", action="store_true")
     parser.add_argument("-d","--debug", help="Debug mode", action="store_true")
     parser.add_argument("-t","--testmode", help="Mode test (pas d'activation du relais)", action="store_true")
+    parser.add_argument("-o","--offset", help="Offset de la détection en mm (ex: -10 pour détecter 10mm plus tôt)", type=float, default=0.0)
     args = parser.parse_args()
     if args.debug:
         my_logging(console_level = DEBUG, logfile_level = INFO, details = False)
